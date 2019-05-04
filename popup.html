@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- <link rel= "stylesheet" type= "text/css" href= "normalize.css"/> -->
+    <!-- <link rel= "stylesheet" type= "text/css" href= "skeleton.css"/> -->
+    <link rel= "stylesheet" type= "text/css" href= "styles.css"/>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    <div id="overlay-delete" class="overlay">
+      <div class="centered-pack">
+          <div class="line-icon-container">
+            <span class="line-icon icon-delete"></span>
+          </div>
+          <span id="btn-overlay-check" class="btn-overlay btn-icon icon-check"></span>
+          <span id="btn-overlay-close" class="btn-overlay btn-icon icon-close"></span>
+      </div>
+    </div>
+    <div class="popup-container">
+      <div class="dropdown">
+        <div id="btn-dropdown-links" class="hover line btn-dropdown">
+          <div id="link-selected" class="line-first"></div>
+          <span id="dropdown-icon" class="icon-expand_more"></span>
+          <span id="add-icon" class="icon-add"></span>
+        </div>
+        <div id="panel-dropdown-links">
+        </div>
+      </div>
+      <div id="line-url-input" class="line">
+        <textarea rows="1" cols="10" id="url-input" wrap="soft" tabindex="1" placeholder="URL(s) To Append 链接后缀"></textarea>
+        <button id="btn-go">
+          <span class="icon-open_in_new"></span>
+        </button>
+      </div>
+    </div>
+
+
+    <script src="popup.js"></script>
+
+  </body>
+</html>

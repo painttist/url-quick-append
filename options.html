@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel= "stylesheet" type= "text/css" href= "styles.css"/>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    
+    <div id="overlay-reset" class="overlay">
+      <div class="centered-pack">
+          <div class="line-icon-container">
+            <span class="line-icon icon-replay"></span>
+          </div>
+          <span id="btn-overlay-check" class="btn-overlay btn-icon icon-check"></span>
+          <span id="btn-overlay-close" class="btn-overlay btn-icon icon-close"></span>
+      </div>
+    </div>
+    
+
+    <div class="container-main">
+      <h3>URL Quick Append</h3>
+      <h1>Settings</h1>
+      <div class="options">
+        <div class="option-line" id="option-line-reset">
+          <div class="option-desc">
+            <h3>Reset to Default Links</h3>
+            <!-- <p>Only Load Active Tab</p> -->
+          </div>
+        </div>
+        <label class="option-line" for="check-lazy">
+          <div class="option-desc">
+            <h3>Lazy Load</h3>
+            <p>Only Load Active Tab</p>
+          </div>
+          <div class="switch">
+            <input type="checkbox" id="check-lazy">
+            <span class="slider"></span>
+          </div>
+        </label>
+
+      </div>
+      
+      <div class="btn" id="btn-apply">Apply</div>
+      
+    </div>
+
+    
+
+    <p id="msg-success" class="message hidden">Success!</p>
+  </body>
+  <script src="options.js"></script>
+</html>
