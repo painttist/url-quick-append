@@ -30,13 +30,13 @@ When editing the IDs Input box, you can press `Shift+Enter` to quickly open the 
 
 Examples 例子:
 ```
-https://pan.baidu.com/s/ID123456
-=> ID123456
+https://pan.baidu.com/s/ID-123456
+=> ID-123456
 
-链接：https://pan.baidu.com/s/ID123456 提取码: abc4
-=> ID123456 + Quick Info Box [abc4]
+链接：https://pan.baidu.com/s/ID-123456 提取码: abc4
+=> ID-123456 + Quick Info Box [abc4]
 
-链接：https://pan.baidu.com/s/ID123456提取码: abc4
+链接：https://pan.baidu.com/s/ID-123456提取码: abc4
 => BLANK + Quick Info Box [abc4]
 
 :a123:b321
