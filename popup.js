@@ -2,6 +2,8 @@
 'use strict';
 
 let urlIn = document.getElementById('url-input');
+let btnClean = document.getElementById('btn-clean');
+let btnCleanUndo = document.getElementById('btn-undo');
 let btnGo = document.getElementById('btn-go');
 let btnDropdownLinks = document.getElementById('btn-dropdown-links');
 
@@ -24,6 +26,7 @@ btnGo.disabled = true;
 var oldOpts = getCachedOpts();
 var selectedID = oldOpts.id;
 var urlInText = oldOpts.urlInText;
+var infoText = oldOpts.infoText;
 
 // get options from localStorage
 function getCachedOpts () {
@@ -31,7 +34,7 @@ function getCachedOpts () {
   if (cache) {
     return JSON.parse(cache)
   } else {
-    return { id: 0, urlInText: "" }
+    return { id: 0, urlInText: "", infoText: [] }
   }
 }
 
@@ -50,6 +53,10 @@ function recordID() {
 
 function recordUrlInText() {
   recordOpts({urlInText: urlIn.value});
+}
+
+function recordInfoText() {
+  recordOpts({infoText: infoText});
 }
 
 // Get the URL from storage
@@ -86,14 +93,20 @@ getURLs();
 function setDefaultURLs() {
   chrome.storage.sync.set({urlsInfo : {
       'urlsName': [
-        'Bilibili', 
+        'Google Search',
+        'Youtube Search',
+        'Bilibili Search',
+        'Bilibili ID',
         'Bilibili Up', 
-        'Baidu', 
-        'Pixiv',
+        'Baidu Drive',
+        'Pixiv ID',
         'Pixiv Artists',
-        'Youtube',
-        'Yande.re'],
+        'Youtube ID',
+        'Yande.re ID'],
       'urls': [
+        'https://www.google.com/search?q=',
+        'https://www.youtube.com/results?search_query=',
+        'https://search.bilibili.com/all?keyword=',
         'https://www.bilibili.com/video/av', 
         'https://space.bilibili.com/',
         'https://pan.baidu.com/s/',
@@ -419,9 +432,97 @@ function clearSelection()
 document.addEventListener('input', function (event) {
 
   if (event.target.tagName.toLowerCase() !== 'textarea') return;
+  
   recordUrlInText();
   autoExpand(event.target);
+
+  checkInputToClean();
+  btnCleanUndo.classList.add('hidden');
+
 }, false);
+
+
+btnClean.onclick = cleanInput;
+btnCleanUndo.onclick = undoClearInput;
+
+var beforeUndoUrlsInText;
+
+// TODO Undo Button
+
+function undoClearInput() {
+
+  btnCleanUndo.classList.add('hidden');
+  urlIn.value = beforeUndoUrlsInText;
+
+  urlIn.focus();
+  checkInputToClean();
+
+}
+
+function cleanInput() {
+
+  beforeUndoUrlsInText = urlIn.value;
+
+  var splitSlash = urlIn.value.split("/");
+  var cleanedString = splitSlash.pop();
+  
+  var splitColons = cleanedString.replace('：',':').split(":");
+
+  cleanedString = "";
+
+  console.log (splitColons);
+
+  if (splitColons.length <= 1) {
+    cleanedString += splitColons.join('');
+  } else {
+    var front = splitColons.shift();
+    var frontSplit = front.split(" ");
+    var tag = frontSplit.pop();
+    cleanedString += frontSplit.join('');
+
+    splitColons.forEach(function (el, i){
+      el.replace(' ', '');
+      infoText.push(el);
+      refreshInfo();
+      recordInfoText();
+    })
+  }
+  
+  urlIn.value = cleanedString;
+
+  btnCleanUndo.classList.remove('hidden');
+
+  recordUrlInText();
+  checkInputToClean();
+  urlIn.focus();
+  autoExpand(urlIn);
+}
+
+function checkInputToClean() {
+
+  var toClean = false;
+
+  var splitSlash = urlIn.value.split("/");
+
+  if (splitSlash.length > 1) {
+    toClean = true;
+    console.log(splitSlash);
+  }
+  
+  var splitColons = urlIn.value.replace('：',':').split(":");
+  if (splitColons.length > 1) {
+    toClean = true;
+    
+  }
+
+  if (toClean) {
+    urlIn.classList.add('toClean');
+    btnClean.classList.remove('hidden');
+  } else {
+    urlIn.classList.remove('toClean');
+    btnClean.classList.add('hidden');
+  }
+}
 
 var autoExpand = function (field) {
 
@@ -472,9 +573,6 @@ var autoExpand = function (field) {
   }
 
   field.style.height = height + 'px';
-
-
-
   // field.style.lineHeight = height + 'px';
 
 };
@@ -483,7 +581,7 @@ urlIn.value = urlInText;
 urlIn.focus();
 urlIn.select();
 autoExpand(urlIn);
-
+checkInputToClean();
 
 function scrollTo(element, to, duration) {
     var start = element.scrollTop,
@@ -576,5 +674,122 @@ function toggleLinkEdit(i) {
 }
 
 
+// V1.4 Support for appending info boxes for quickly copying onclick
+
+// const dataInfoIDAttribute = "data-info-id";
+
+function displayInfo() {
+
+  if (infoText.length <= 0) return;
+
+  var infoContainer = document.getElementById('line-info-container');
+
+  infoText.forEach( function(element, index) {
+    var newInfoText = document.createElement('button');
+    newInfoText.classList.add('btn-info');
+    newInfoText.innerHTML = element;
+    // newInfoText.setAttribute(dataInfoIDAttribute, "0");
+    infoContainer.appendChild(newInfoText);
+  });
+
+  // Add click events to them
+  Array.from(document.getElementsByClassName('btn-info')).forEach(
+    function (elem, index) {
+      elem.onclick = function() {
+        copyToClipboard(this.innerHTML);
+
+        removeInfoText(this.innerHTML);
+
+        urlIn.focus();
+
+        this.innerHTML = "Copied";
+        this.style.width = this.clientWidth;
+        console.log(this.clientWidth);
+        // console.log(typeof this);
+        // animateCSS(this, 'fadeOut', function(element){
+        //   element.parentNode.removeChild(element);
+        // });
+        
+        var elem = this;
+        setTimeout(function(){
+          elem.classList.add("toShrink");
+        }, 500);
+        this.addEventListener('transitionend', function(ev){
+          console.log(ev);
+          if (ev.propertyName == "width") {
+            console.log("Removed");
+            ev.target.remove();
+          }
+          else {
+            ev.target.classList.add('toShrinkWidth');
+          }
+          // elem.parentNode.removeChild(elem);
+          // var el = ev.target;
+          // var parent = el.parentNode;
+          // console.log(parent);
+          // el.parentNode.removeChild(el);
+        })
+
+        
+        // removeInfoText(parseInt(this.getAttribute(dataInfoIDAttribute), 10));
+    }
+  });
+}
+
+function animateCSS(element, animationName, callback) {
+
+    const node = (typeof element === "object") ? element : document.querySelector(element);
+    node.classList.add('animated', animationName)
+
+    function handleAnimationEnd() {
+        node.classList.remove('animated', animationName)
+        node.removeEventListener('animationend', handleAnimationEnd)
+
+        if (typeof callback === 'function') callback(node)
+    }
+
+    node.addEventListener('animationend', handleAnimationEnd)
+}
+
+function clearInfo() {
+  var infoContainer = document.getElementById('line-info-container');
+  infoContainer.innerHTML = "";
+}
+
+function refreshInfo() {
+  clearInfo();
+  displayInfo();
+}
+
+function removeInfoText(content) {
+  var index = infoText.indexOf(content);
+  if (index > -1) {
+    infoText.splice(index, 1);
+  }
+  recordInfoText();
+}
+
+displayInfo();
+
+
+const copyToClipboard = str => {
+  const el = document.createElement('textarea');  // Create a <textarea> element
+  el.value = str;                                 // Set its value to the string that you want copied
+  el.setAttribute('readonly', '');                // Make it readonly to be tamper-proof
+  el.style.position = 'absolute';                 
+  el.style.left = '-9999px';                      // Move outside the screen to make it invisible
+  document.body.appendChild(el);                  // Append the <textarea> element to the HTML document
+  const selected =            
+    document.getSelection().rangeCount > 0        // Check if there is any content selected previously
+      ? document.getSelection().getRangeAt(0)     // Store selection if found
+      : false;                                    // Mark as false to know no selection existed before
+  el.select();                                    // Select the <textarea> content
+  document.execCommand('copy');                   // Copy - only works as a result of a user action (e.g. click events)
+  document.body.removeChild(el);                  // Remove the <textarea> element
+  if (selected) {                                 // If a selection existed before copying
+    document.getSelection().removeAllRanges();    // Unselect everything on the HTML document
+    document.getSelection().addRange(selected);   // Restore the original selection
+  }
+};
 
 

@@ -71,14 +71,20 @@ overlayReset.addEventListener('click', function() {
 function setDefaultURLs() {
   chrome.storage.sync.set({urlsInfo : {
       'urlsName': [
-        'Bilibili', 
+        'Google Search',
+        'Youtube Search',
+        'Bilibili Search',
+        'Bilibili ID',
         'Bilibili Up', 
-        'Baidu', 
-        'Pixiv',
+        'Baidu Drive',
+        'Pixiv ID',
         'Pixiv Artists',
-        'Youtube',
-        'Yande.re'],
+        'Youtube ID',
+        'Yande.re ID'],
       'urls': [
+        'https://www.google.com/search?q=',
+        'https://www.youtube.com/results?search_query=',
+        'https://search.bilibili.com/all?keyword=',
         'https://www.bilibili.com/video/av', 
         'https://space.bilibili.com/',
         'https://pan.baidu.com/s/',

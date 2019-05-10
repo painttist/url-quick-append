@@ -3,6 +3,7 @@
   <head>
     <!-- <link rel= "stylesheet" type= "text/css" href= "normalize.css"/> -->
     <!-- <link rel= "stylesheet" type= "text/css" href= "skeleton.css"/> -->
+    <!-- <link rel= "stylesheet" type= "text/css" href= "animate.css"/> -->
     <link rel= "stylesheet" type= "text/css" href= "styles.css"/>
     <meta charset="UTF-8">
   </head>
@@ -28,9 +29,17 @@
       </div>
       <div id="line-url-input" class="line">
         <textarea rows="1" cols="10" id="url-input" wrap="soft" tabindex="1" placeholder="URL(s) To Append 链接后缀"></textarea>
+        <button id="btn-clean" class="hidden">
+          <span class="icon-mode_edit"></span>
+        </button>
+        <button id="btn-undo" class="hidden">
+          <span class="icon-replay"></span>
+        </button>
         <button id="btn-go">
           <span class="icon-open_in_new"></span>
         </button>
+      </div>
+      <div id="line-info-container" class="line">
       </div>
     </div>
 
