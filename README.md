@@ -27,5 +27,7 @@ When editing the IDs Input box, you can press `Shift+Enter` to quickly open the 
 
 ## Version Notes
 
+- Version 1.4 Allows URL clean-up, Added quick info boxes
+- Version 1.3.1 Added More Default Search Queries including Youtube and Google
 - Version 1.3 Removed "tabs" permission because it was not needed.
 - Version 1.2 Fixed Layout Issues for Windows
