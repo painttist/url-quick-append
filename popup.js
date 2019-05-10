@@ -12,7 +12,7 @@ let overlayDel = document.getElementById('overlay-delete');
 let btnOverlayCheck = document.getElementById("btn-overlay-check");
 let btnOverlayClose = document.getElementById("btn-overlay-close");
 
-var cacheKey = 'url-quick-append-cache';
+const cacheKey = 'url-quick-append-cache';
 
 var lazyLoading = true;
 var theurl;
@@ -28,6 +28,15 @@ var selectedID = oldOpts.id;
 var urlInText = oldOpts.urlInText;
 var infoText = oldOpts.infoText;
 
+// clearCache if any of the item is undefined
+if (!((selectedID) && (urlInText) && (infoText))) {
+  clearCache();
+  oldOpts = getCachedOpts();
+  selectedID = oldOpts.id;
+  urlInText = oldOpts.urlInText;
+  infoText = oldOpts.infoText;
+}
+
 // get options from localStorage
 function getCachedOpts () {
   let cache = localStorage.getItem(cacheKey)
@@ -36,6 +45,10 @@ function getCachedOpts () {
   } else {
     return { id: 0, urlInText: "", infoText: [] }
   }
+}
+
+function clearCache () {
+  localStorage.removeItem(cacheKey);
 }
 
 // record options into localStorage
@@ -77,7 +90,6 @@ function setURLs() {
       urlsName: urlsName
       }
     }, function(){
-      // console.log("URLs Updated");
     });
 }
 
@@ -117,7 +129,6 @@ function setDefaultURLs() {
         ]
       }
     }, function(){
-      // console.log("Set Default URLs");
     });
 }
 
@@ -404,7 +415,6 @@ function toggleDropdown() {
 
   var dropdown = document.getElementById("panel-dropdown-links");
   dropdown.classList.toggle("show");
-  // console.log("toggle panel");
 
   if (dropdown.classList.contains("show")) {
     document.getElementById('dropdown-icon').classList = 'icon-expand_less';
@@ -414,7 +424,6 @@ function toggleDropdown() {
 
   setURLs();
 
-  // console.log("Toggle Drop Down");
 
 }
 
@@ -447,8 +456,6 @@ btnCleanUndo.onclick = undoClearInput;
 
 var beforeUndoUrlsInText;
 
-// TODO Undo Button
-
 function undoClearInput() {
 
   btnCleanUndo.classList.add('hidden');
@@ -470,7 +477,7 @@ function cleanInput() {
 
   cleanedString = "";
 
-  console.log (splitColons);
+
 
   if (splitColons.length <= 1) {
     cleanedString += splitColons.join('');
@@ -506,7 +513,7 @@ function checkInputToClean() {
 
   if (splitSlash.length > 1) {
     toClean = true;
-    console.log(splitSlash);
+  
   }
   
   var splitColons = urlIn.value.replace('：',':').split(":");
@@ -542,12 +549,6 @@ var autoExpand = function (field) {
   //              // + parseInt(computed.getPropertyValue('padding-bottom'), 10)
   //              + parseInt(computed.getPropertyValue('border-bottom-width'), 10);
 
-  // console.log(field.scrollHeight);
-  // console.log("Scroll Height:" + field.scrollHeight);
-  // console.log("Client Height:" + field.clientHeight);
-  // console.log("Padding Top:" + parseInt(computed.getPropertyValue('padding-top'), 10));
-  // console.log("Line Height: " + computed.getPropertyValue('line-height'));
-  // console.log("Max Height: " + computed.getPropertyValue('max-height'));
 
 
   var clientHeight = parseInt(field.clientHeight, 10);
@@ -558,17 +559,9 @@ var autoExpand = function (field) {
   var maxHeight = parseInt(computed.getPropertyValue('max-height'), 10);
   var height = field.scrollHeight - baseClientHeight + baseLineHeight;
 
-  // console.log("Base Client Height: " + baseClientHeight);
-  // console.log("Height: " + height);
-  // console.log("Current Height: " + currentHeight);
 
   if ((height > currentHeight) && (height > maxHeight)) {
-    // console.log("Scroll Height:" + field.scrollHeight);
-    // console.log("Scroll Top:" + field.scrollTop);
     var scrollTopTarget = (height - baseClientHeight - baseLineHeight);
-    // console.log("Scroll Top Target: " + scrollTopTarget);
-    // console.log("Height: " + height);
-    // console.log("Current Height: " + currentHeight);
     field.scrollTop = scrollTopTarget;
   }
 
@@ -620,25 +613,20 @@ document.addEventListener('keydown', function(event){
 
   // Check if it is an enter
   if (event.keyCode == 13) {
-    // console.log("Pressed Enter");
     if (element.tagName.toLowerCase() == "input") {
-      // console.log("Input Confirmed");
       event.preventDefault();
       toggleLinkEdit(i);
     } else
     if (element.tagName.toLowerCase() == "textarea"){
-      // console.log("Text Area Confirmed");
       if (event.shiftKey) {
 
         event.preventDefault();
-        // console.log("GO!");
         goToURL();
       }
     }
   }
   
 
-  // console.log(element);
   
 });
 
@@ -704,8 +692,7 @@ function displayInfo() {
 
         this.innerHTML = "Copied";
         this.style.width = this.clientWidth;
-        console.log(this.clientWidth);
-        // console.log(typeof this);
+      
         // animateCSS(this, 'fadeOut', function(element){
         //   element.parentNode.removeChild(element);
         // });
@@ -715,9 +702,9 @@ function displayInfo() {
           elem.classList.add("toShrink");
         }, 500);
         this.addEventListener('transitionend', function(ev){
-          console.log(ev);
+        
           if (ev.propertyName == "width") {
-            console.log("Removed");
+          
             ev.target.remove();
           }
           else {
@@ -726,7 +713,6 @@ function displayInfo() {
           // elem.parentNode.removeChild(elem);
           // var el = ev.target;
           // var parent = el.parentNode;
-          // console.log(parent);
           // el.parentNode.removeChild(el);
         })
 
