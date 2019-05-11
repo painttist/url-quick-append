@@ -13,6 +13,7 @@ let btnOverlayCheck = document.getElementById("btn-overlay-check");
 let btnOverlayClose = document.getElementById("btn-overlay-close");
 
 const cacheKey = 'url-quick-append-cache';
+const keywords = ['密码', '提取码', '密碼', '提取碼'];
 
 var lazyLoading = true;
 var theurl;
@@ -424,7 +425,6 @@ function toggleDropdown() {
 
   setURLs();
 
-
 }
 
 function clearSelection()
@@ -463,6 +463,7 @@ function undoClearInput() {
 
   urlIn.focus();
   checkInputToClean();
+  autoExpand(urlIn);
 
 }
 
@@ -472,12 +473,18 @@ function cleanInput() {
 
   var splitSlash = urlIn.value.split("/");
   var cleanedString = splitSlash.pop();
+
+  keywords.forEach(function(el, i){
+    var wordSplit = cleanedString.split(el);
+
+    if (wordSplit.length > 1) {
+      cleanedString = wordSplit.join(' :');
+    }
+  });
   
   var splitColons = cleanedString.replace('：',':').split(":");
 
   cleanedString = "";
-
-
 
   if (splitColons.length <= 1) {
     cleanedString += splitColons.join('');
@@ -489,9 +496,11 @@ function cleanInput() {
 
     splitColons.forEach(function (el, i){
       el.replace(' ', '');
-      infoText.push(el);
-      refreshInfo();
-      recordInfoText();
+      if (el.length > 0) {
+        infoText.push(el);
+        refreshInfo();
+        recordInfoText();
+      }
     })
   }
   
@@ -507,19 +516,26 @@ function cleanInput() {
 
 function checkInputToClean() {
 
+  var raw = urlIn.value;
   var toClean = false;
 
-  var splitSlash = urlIn.value.split("/");
+  var splitSlash = raw.split("/");
 
   if (splitSlash.length > 1) {
     toClean = true;
-  
   }
-  
-  var splitColons = urlIn.value.replace('：',':').split(":");
+
+  keywords.forEach(function(el, i){
+    var wordSplit = raw.split(el);
+
+    if (wordSplit.length > 1) {
+      toClean = true;
+    }
+  })
+
+  var splitColons = raw.replace('：',':').split(":");
   if (splitColons.length > 1) {
     toClean = true;
-    
   }
 
   if (toClean) {
@@ -757,6 +773,9 @@ function removeInfoText(content) {
 
 displayInfo();
 
+String.prototype.isEmpty = function() {
+    return (this.length === 0 || !this.trim());
+};
 
 const copyToClipboard = str => {
   const el = document.createElement('textarea');  // Create a <textarea> element

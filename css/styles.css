@@ -94,6 +94,30 @@
 }*/
 
 
+/*---- CUSTOM SCROLL BAR ----*/
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+
+
+
 .btn {
   height: 65px;
   line-height: 65px;
@@ -411,7 +435,7 @@ input:checked + .slider:before {
 }
 
 #url-input.toClean {
-  padding-right: 24px;
+  /*padding-right: 24px;*/
 }
 
 #url-input {
@@ -440,10 +464,11 @@ input:checked + .slider:before {
 }
 
 #btn-clean, #btn-undo {
-  position: absolute;
+  /*position: absolute;
   top: 0;
-  right: 45px;
-  padding: 13px 10px;
+  right: 45px;*/
+  
+  padding: 13px auto;
   border: 0px;
 
   cursor: pointer;
