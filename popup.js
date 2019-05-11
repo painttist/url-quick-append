@@ -1,16 +1,16 @@
 
 'use strict';
 
-let urlIn = document.getElementById('url-input');
-let btnClean = document.getElementById('btn-clean');
-let btnCleanUndo = document.getElementById('btn-undo');
-let btnGo = document.getElementById('btn-go');
-let btnDropdownLinks = document.getElementById('btn-dropdown-links');
+var urlIn = document.getElementById('url-input');
+var btnClean = document.getElementById('btn-clean');
+var btnCleanUndo = document.getElementById('btn-undo');
+var btnGo = document.getElementById('btn-go');
+var btnDropdownLinks = document.getElementById('btn-dropdown-links');
 
-let overlayDel = document.getElementById('overlay-delete');
+var overlayDel = document.getElementById('overlay-delete');
 
-let btnOverlayCheck = document.getElementById("btn-overlay-check");
-let btnOverlayClose = document.getElementById("btn-overlay-close");
+var btnOverlayCheck = document.getElementById("btn-overlay-check");
+var btnOverlayClose = document.getElementById("btn-overlay-close");
 
 const cacheKey = 'url-quick-append-cache';
 const keywords = ['密码', '提取码', '密碼', '提取碼'];
@@ -29,22 +29,18 @@ var selectedID = oldOpts.id;
 var urlInText = oldOpts.urlInText;
 var infoText = oldOpts.infoText;
 
-// clearCache if any of the item is undefined
-if (!((selectedID) && (urlInText) && (infoText))) {
-  clearCache();
-  oldOpts = getCachedOpts();
-  selectedID = oldOpts.id;
-  urlInText = oldOpts.urlInText;
-  infoText = oldOpts.infoText;
-}
+// Reset to default if undefined
+selectedID =  selectedID == undefined ? 0 : selectedID;
+urlInText =  urlInText == undefined ? "" : urlInText;
+infoText = infoText == undefined ? [] : infoText;
 
 // get options from localStorage
 function getCachedOpts () {
-  let cache = localStorage.getItem(cacheKey)
+  var cache = localStorage.getItem(cacheKey)
   if (cache) {
     return JSON.parse(cache)
   } else {
-    return { id: 0, urlInText: "", infoText: [] }
+    return { id: 0, urlInText: "", infoText: undefined }
   }
 }
 
@@ -467,42 +463,99 @@ function undoClearInput() {
 
 }
 
+const regKey = RegExp('['+keywords.join('')+']{2,3} *:+ *\\S*', 'gm');
+const regKeySingle = RegExp('['+keywords.join('')+']{2,3} *:+ *\\S*');
+// const regKeyClean = RegExp('['+keywords.join('')+']{2,3}:+ *');
+const regColonClean = /[\s\S]*:+ */g;
+const regColon = /:+[^:\s]+/g;
+
 function cleanInput() {
 
   beforeUndoUrlsInText = urlIn.value;
 
-  var splitSlash = urlIn.value.split("/");
-  var cleanedString = splitSlash.pop();
+  var raw = urlIn.value;
 
-  keywords.forEach(function(el, i){
-    var wordSplit = cleanedString.split(el);
+  // Find all 密码 提取码 + 冒号
 
-    if (wordSplit.length > 1) {
-      cleanedString = wordSplit.join(' :');
-    }
-  });
-  
-  var splitColons = cleanedString.replace('：',':').split(":");
+  // var infos = [];
+  if (!raw) return;
 
-  cleanedString = "";
+  // Pick out the keys
+  raw = raw.replace('：',':');
+  var keys = raw.match(regKey);
+  raw = raw.replace(regKey, " ");
 
-  if (splitColons.length <= 1) {
-    cleanedString += splitColons.join('');
-  } else {
-    var front = splitColons.shift();
-    var frontSplit = front.split(" ");
-    var tag = frontSplit.pop();
-    cleanedString += frontSplit.join('');
+  // Delete Any Ending"/"
+  raw = raw.replace(/\/$/gm, "");
+  // Delete Any "/" followed by Spaces
+  raw = raw.replace(/\/\s/g, " ");
+  // Delete all Front URLs
+  raw = raw.replace(/(\S*\/)+/g, '\n');
 
-    splitColons.forEach(function (el, i){
-      el.replace(' ', '');
-      if (el.length > 0) {
-        infoText.push(el);
-        refreshInfo();
-        recordInfoText();
+  var colons = raw.match(regColon);
+  raw = raw.replace(regColon, " ");
+
+  var infos = [];
+
+  if (keys)
+    infos = infos.concat(keys);
+
+  if (colons)
+    infos = infos.concat(colons);
+
+  if (infos) {
+    infos.forEach(function (el, i){
+      var info = el.replace(regColonClean, "");
+      if (info.length > 0) {
+        infoText.push(info);
       }
     })
   }
+
+  var cleanedString = raw.match(/\S+/g);
+
+  if (cleanedString) {
+    cleanedString.join('\n');
+  } else {
+    cleanedString = "";
+  }
+
+  // 密码 提取码 [\u5bc6\u7801\u63d0\u53d6\u78bc]{2,3}
+  
+  // while ((cleanedString == '') && (splitSlash.length >= 1)) {
+  // var cleanedString = splitSlash.pop();
+  // // }
+
+  // keywords.forEach(function(el, i){
+  //   var wordSplit = cleanedString.split(el);
+
+  //   if (wordSplit.length > 1) {
+  //     cleanedString = wordSplit.join(' :');
+  //   }
+  // });
+  
+  // var splitColons = cleanedString.replace('：',':').split(":");
+
+  // cleanedString = "";
+
+  // if (splitColons.length <= 1) {
+  //   cleanedString += splitColons.join('');
+  // } else {
+  //   var front = splitColons.shift();
+  //   var frontSplit = front.split(" ");
+  //   var tag = frontSplit.pop();
+  //   cleanedString += frontSplit.join('');
+
+  //   splitColons.forEach(function (el, i){
+  //     el.replace(' ', '');
+  //     if (el.length > 0) {
+  //       infoText.push(el);
+  //     }
+  //   })
+  // }
+
+  refreshInfo();
+  recordInfoText();
   
   urlIn.value = cleanedString;
 
@@ -512,6 +565,8 @@ function cleanInput() {
   checkInputToClean();
   urlIn.focus();
   autoExpand(urlIn);
+
+
 }
 
 function checkInputToClean() {
@@ -519,22 +574,18 @@ function checkInputToClean() {
   var raw = urlIn.value;
   var toClean = false;
 
-  var splitSlash = raw.split("/");
-
-  if (splitSlash.length > 1) {
+  var matchSlash = raw.match('/');
+  if (matchSlash) {
     toClean = true;
   }
 
-  keywords.forEach(function(el, i){
-    var wordSplit = raw.split(el);
+  var matchColons = raw.replace('：',':').match(/:\S/);
+  if (matchColons) {
+    toClean = true;
+  }
 
-    if (wordSplit.length > 1) {
-      toClean = true;
-    }
-  })
-
-  var splitColons = raw.replace('：',':').split(":");
-  if (splitColons.length > 1) {
+  var checkKeys = raw.match(regKeySingle);
+  if (checkKeys) {
     toClean = true;
   }
 
@@ -682,6 +733,8 @@ function toggleLinkEdit(i) {
 
 // const dataInfoIDAttribute = "data-info-id";
 
+'use strict';
+
 function displayInfo() {
 
   if (infoText.length <= 0) return;
@@ -701,13 +754,16 @@ function displayInfo() {
     function (elem, index) {
       elem.onclick = function() {
         copyToClipboard(this.innerHTML);
-
         removeInfoText(this.innerHTML);
 
         urlIn.focus();
 
         this.innerHTML = "Copied";
         this.style.width = this.clientWidth;
+
+        this.onclick = function(ev) {
+          ev.target.remove();
+        }
       
         // animateCSS(this, 'fadeOut', function(element){
         //   element.parentNode.removeChild(element);
@@ -718,9 +774,7 @@ function displayInfo() {
           elem.classList.add("toShrink");
         }, 500);
         this.addEventListener('transitionend', function(ev){
-        
           if (ev.propertyName == "width") {
-          
             ev.target.remove();
           }
           else {

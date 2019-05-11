@@ -3,9 +3,9 @@
 
 var lazyLoading = false;
 
-let checkLazy = document.getElementById('check-lazy');
-let msgSuccess = document.getElementById('msg-success');
-let btnApply = document.getElementById('btn-apply');
+var checkLazy = document.getElementById('check-lazy');
+var msgSuccess = document.getElementById('msg-success');
+var btnApply = document.getElementById('btn-apply');
 
 function getOptions() {
   chrome.storage.sync.get('options', function(data) {
@@ -37,12 +37,12 @@ getOptions();
 btnApply.addEventListener('click', function() { setOptions(); });
 
 
-let optionReset = document.getElementById('option-line-reset');
+var optionReset = document.getElementById('option-line-reset');
 
-let overlayReset = document.getElementById('overlay-reset');
+var overlayReset = document.getElementById('overlay-reset');
 
-let btnOverlayCheck = document.getElementById('btn-overlay-check');
-let btnOverlayClose = document.getElementById('btn-overlay-close');
+var btnOverlayCheck = document.getElementById('btn-overlay-check');
+var btnOverlayClose = document.getElementById('btn-overlay-close');
 
 optionReset.addEventListener('click', function() {
   overlayReset.classList.toggle('on');

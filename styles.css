@@ -24,6 +24,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+body {
+  margin: 8px;
+}
+
 .icon-add:before {
   content: "\e145";
 }
