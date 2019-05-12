@@ -2,15 +2,19 @@
 'use strict';
 
 var urlIn = document.getElementById('url-input');
+
 var btnClean = document.getElementById('btn-clean');
 var btnCleanUndo = document.getElementById('btn-undo');
 var btnGo = document.getElementById('btn-go');
 var btnDropdownLinks = document.getElementById('btn-dropdown-links');
+var panelDropdown = document.getElementById("panel-dropdown-links");
 
 var overlayDel = document.getElementById('overlay-delete');
 
 var btnOverlayCheck = document.getElementById("btn-overlay-check");
 var btnOverlayClose = document.getElementById("btn-overlay-close");
+
+var divLinkSelected = document.getElementById('display-link-selected');
 
 const cacheKey = 'url-quick-append-cache';
 const keywords = ['密码', '提取码', '密碼', '提取碼'];
@@ -129,8 +133,24 @@ function setDefaultURLs() {
     });
 }
 
-// setDefaultURLs();
+// UTILITY
 
+function getElemIndex(elem) {
+  return Array.from(elem.parentNode.children).indexOf(elem);
+}
+
+function getAbsoluteHeight(el) {
+  // Get the DOM Node if you pass in a string
+  el = (typeof el === 'string') ? document.querySelector(el) : el; 
+
+  var styles = window.getComputedStyle(el);
+  var margin = parseFloat(styles['marginTop']) +
+               parseFloat(styles['marginBottom']);
+
+  return Math.ceil(el.offsetHeight + margin);
+}
+
+// GO
 
 btnGo.onclick = goToURL;
 
@@ -155,6 +175,10 @@ function goToURL() {
 
 // DROP DOWN
 
+// document.body.addEventListener('click', function(){
+//   console.log(document.activeElement);
+// });
+
 btnDropdownLinks.addEventListener('click', function() { 
   if (event.target.classList.contains('icon-add')) {
     appendNewLink();
@@ -165,8 +189,6 @@ btnDropdownLinks.addEventListener('click', function() {
 
 var linksList = document.getElementsByClassName('link');
 
-var panelDropdown = document.getElementById("panel-dropdown-links");
-
 function appendURLList() {
   // Append Links form URL List
   urls.forEach(function(element, i) {
@@ -176,7 +198,6 @@ function appendURLList() {
   });
 
   appendAddLink();
-  
 }
 
 function appendNewLink() {
@@ -214,6 +235,7 @@ function appendAddLink() {
 
   var link = document.createElement("div");
   link.classList = "line link";
+  link.setAttribute('tabindex', '-1');
 
   link.addEventListener('click', function(){
     appendNewLink();
@@ -234,18 +256,16 @@ function appendAddLink() {
 overlayDel.addEventListener('click', function(){
   if (event.target.classList.contains('btn-overlay')) {
     if (event.target.classList.contains('icon-check')) {
+      
       // Delete link pending
       panelDropdown.children[selectedID].classList.add('removed');
+      urls.splice(selectedID, 1);
+      urlsName.splice(selectedID, 1);
+      setURLs();
 
-      setTimeout(function(){ 
-
-        panelDropdown.innerHTML = "";
-        urls.splice(selectedID, 1);
-        urlsName.splice(selectedID, 1);
-        appendURLList();
-        setURLs();
-
-      }, 250);
+      panelDropdown.children[selectedID].addEventListener('transitionend', function(){
+        this.remove();
+      });
       
       overlayDel.classList.toggle('on');
 
@@ -258,159 +278,117 @@ overlayDel.addEventListener('click', function(){
 
 });
 
-function appendToPanelDropdown(i) {
+function linkOnClick(ev) {
 
-    var link = document.createElement("div");
-    link.classList = "line link";
+  var target = ev.target;
+  var i = getElemIndex(ev.currentTarget);
 
-    link.addEventListener('mouseover', function(){
-      changeLink(i);
-    });
-    link.addEventListener('click', function(ev) {
+  if ((target.classList.contains('link-btn-delete'))){
+    // Clicked on the Delete Button
+    selectedID = i;
+    overlayDel.classList.toggle('on');
+  } else if ((target.classList.contains('link-btn-edit'))) {
+    // Clicked on the Edit
+    toggleLinkEdit(i);
+  } else if (target.classList.contains("link-name") || 
+            (target.classList.contains("link-url"))) 
+  {
+    changeLink(i);
+    if (!target.parentNode.classList.contains('edit')) {
+      toggleDropdown();
+    }
+  } else if (target.classList.contains('link')){
+    // Clicked on the Link itself
 
-      var target = ev.target;
+    // Save the URL
+    urlsName[i] = ev.target.children[0].value;
+    urls[i] = ev.target.children[3].value;
+    setURLs();
 
-      if ((target.classList.contains('link-btn-delete'))){
-        overlayDel.classList.toggle('on');
-        selectedID = i;
-      } else if ((target.classList.contains('link-btn-edit'))) {
-        toggleLinkEdit(i);
-      } else if (target.classList.contains("link-name") || 
-                (target.classList.contains("link-url"))) 
-      {
-        changeLink(i);
-        if (!target.parentNode.classList.contains('edit')) {
-          toggleDropdown();
-        }
-      } else if (target.classList.contains('link')){
-        // Clicked on the Link itself
-
-        // Save the URL
-        urlsName[i] = ev.target.children[0].value;
-        urls[i] = ev.target.children[3].value;
-        setURLs();
-
-        // Change the link displaying
-        changeLink(i);
-        
-        if (!target.classList.contains('edit')) {
-          toggleDropdown();
-        }
-      }
-
-      // else if ( link.classList.contains("edit") && 
-      //         ((event.target.classList.contains("link-name")) || 
-      //         (event.target.classList.contains("link-url")))) {
-      //   selectedID = i;
-      // } else {
-
-      //   // Modifiy the URL
-      //   urlsName[i] = link.children[0].value;
-      //   urls[i] = link.children[3].value;
-      //   // Set the URLs
-      //   setURLs();
-
-      //   if (event.target.classList.contains('link'))
-      //   if (event.target.children[1].classList.contains('icon-check')) {
-      //     toggleLinkEdit(i);
-      //   }
-
-      //   // Clicked on the line but outside of everything
-      //   selectedID = i;
-      //   changeLink(i);
-        
-      //   if (!link.classList.contains('edit')) {
-      //     console.log(link.classList);
-      //     toggleDropdown();
-      //   }
-      // }
-    });
-
-    var linkName = document.createElement("input");
-    linkName.id = "link-input-name-" + i;
-    linkName.classList = "line-first link-input link-name";
-    // linkName.id = "link-number-" + i;
-    linkName.value = urlsName[i];
-    linkName.readOnly = true;
-
-    var linkURL = document.createElement("input");
-    linkURL.id = "link-input-url-" + i;
-    linkURL.classList = "link-input link-url";
-    linkURL.value = urls[i];
-
-    var linkDeleteIcon = document.createElement('span');
-    linkDeleteIcon.classList = "link-btn-delete icon-delete";
-
-    var linkEditIcon = document.createElement('span');
-    linkEditIcon.classList = "link-btn-edit icon-mode_edit";
-
-    link.appendChild(linkName);
-    link.appendChild(linkEditIcon);
-    link.appendChild(linkDeleteIcon);
-    link.appendChild(linkURL);
-
-    panelDropdown.appendChild(link);
-
-    return link;
+    // Change the link displaying
+    changeLink(i);
+    
+    if (!target.classList.contains('edit')) {
+      toggleDropdown();
+    }
+  }
 
 }
 
-// // Add event listender to all links
-// Array.from(linksList).forEach(function (element, i) {
-//     element.addEventListener('mouseover', function(){
-//       changeLink(i);
-//     });
-//     element.addEventListener('click', function() {
-//       if ((event.target.classList.contains('link-btn-edit'))) {
-//       }
-//       else {
-//         toggleDropdown();
-//       }
-//     });
-// });
+function appendToPanelDropdown(i) {
+
+  var link = document.createElement("div");
+  link.classList = "line link";
+  link.setAttribute('tabindex', '-1');
+
+  link.addEventListener('mouseover', function(){
+    changeLink(i);
+  });
+  link.addEventListener('click', linkOnClick);
+
+  var linkName = document.createElement("input");
+  linkName.id = "link-input-name";
+  linkName.classList = "line-first link-input link-name";
+  // linkName.id = "link-number-" + i;
+  linkName.value = urlsName[i];
+  linkName.readOnly = true;
+
+  var linkURL = document.createElement("input");
+  linkURL.id = "link-input-url";
+  linkURL.classList = "link-input link-url";
+  linkURL.value = urls[i];
+
+  var linkDeleteIcon = document.createElement('span');
+  linkDeleteIcon.classList = "link-btn-delete icon-delete";
+
+  var linkEditIcon = document.createElement('span');
+  linkEditIcon.classList = "link-btn-edit icon-mode_edit";
+
+  link.appendChild(linkName);
+  link.appendChild(linkEditIcon);
+  link.appendChild(linkDeleteIcon);
+  link.appendChild(linkURL);
+
+  panelDropdown.appendChild(link);
+
+  return link;
+}
+
+function displayLink(id) {
+  divLinkSelected.innerHTML = urlsName[id];
+}
 
 function changeLink(id) {
-  if (id >= urls.length) {
-    selectedID = urls.length-1;
+
+  tabDeselectLink(selectedID);
+
+  if (id < 0) {
+    selectedID = urls.length - 1;
+  } else if (id >= urls.length) {
+    selectedID = 0;
   } else {
     selectedID = id;
   }
-  document.getElementById('link-selected').innerHTML = urlsName[selectedID];
+
+  tabSelectLink(selectedID);
+
+  displayLink(selectedID);
   recordID();
 }
 
-// Close the dropdown if the user clicks outside of it
-// window.onclick = function(event) {
-
-//   if ((event.target.classList.contains('link'))) {
-//     var dropdowns = document.getElementsByClassName("dropdown-content");
-//     var i;
-//     for (i = 0; i < dropdowns.length; i++) {
-//       var openDropdown = dropdowns[i];
-//       if (openDropdown.classList.contains('show')) {
-//         openDropdown.classList.remove('show');
-//       }
-//     }
-//   }
-// }
-
-/* When the user clicks on the button, 
-toggle between hiding and showing the dropdown content */
 function toggleDropdown() {
 
   btnDropdownLinks.classList.toggle("expanded");
+  panelDropdown.classList.toggle("show");
 
-  var dropdown = document.getElementById("panel-dropdown-links");
-  dropdown.classList.toggle("show");
-
-  if (dropdown.classList.contains("show")) {
+  if (panelDropdown.classList.contains("show")) {
     document.getElementById('dropdown-icon').classList = 'icon-expand_less';
   } else {
     document.getElementById('dropdown-icon').classList = 'icon-expand_more';
   }
 
+  // Save the URLs
   setURLs();
-
 }
 
 function clearSelection()
@@ -419,6 +397,11 @@ function clearSelection()
   else if (document.selection) {document.selection.empty();}
 }
 
+// IS SOMETHING?
+
+function isDropDownOpen() {
+  return btnDropdownLinks.classList.contains("expanded");
+}
 
 // URL INPUT
 
@@ -450,7 +433,6 @@ function undoClearInput() {
   urlIn.focus();
   checkInputToClean();
   autoExpand(urlIn);
-
 }
 
 const regKey = RegExp('['+keywords.join('')+']{2,3} *:+ *\\S*', 'gm');
@@ -555,8 +537,6 @@ function cleanInput() {
   checkInputToClean();
   urlIn.focus();
   autoExpand(urlIn);
-
-
 }
 
 function checkInputToClean() {
@@ -632,20 +612,22 @@ autoExpand(urlIn);
 checkInputToClean();
 
 function scrollTo(element, to, duration) {
-    var start = element.scrollTop,
-        change = to - start,
-        currentTime = 0,
-        increment = 20;
 
-    var animateScroll = function(){        
-        currentTime += increment;
-        var val = Math.easeInOutQuad(currentTime, start, change, duration);
-        element.scrollTop = val;
-        if(currentTime < duration) {
-            setTimeout(animateScroll, increment);
-        }
-    };
-    animateScroll();
+  var start = element.scrollTop,
+      change = to - start,
+      currentTime = 0,
+      increment = 20;
+
+  var animateScroll = function(){        
+      currentTime += increment;
+      var val = Math.easeInOutQuad(currentTime, start, change, duration);
+      element.scrollTop = val;
+      if(currentTime < duration) {
+          setTimeout(animateScroll, increment);
+      }
+  };
+
+  animateScroll();
 }
 
 //t = current time
@@ -659,31 +641,147 @@ Math.easeInOutQuad = function (t, b, c, d) {
     return -c/2 * (t*(t-2) - 1) + b;
 };
 
+function tabSelectLink(id) {
+  panelDropdown.children[id].setAttribute('data-selected', 'true');
+}
+
+function tabDeselectLink(id) {
+  panelDropdown.children[id].setAttribute('data-selected', 'false');
+}
+
+function switchLinkInputFocus(elem) {
+  console.log("Switch Focus");
+  var link = elem.parentNode;
+
+  var linkName = link.children[0];
+  var linkEditIcon = link.children[1];
+  var linkDeleteIcon = link.children[2];
+  var linkURL = link.children[3];
+
+  if (document.activeElement == linkName) {
+    linkURL.focus();
+    linkURL.select();
+  } else {
+    linkName.focus();
+    linkName.select();
+  }
+}
+
+function scrollToLink(id) {
+  var elem = panelDropdown.children[id];
+  var offsetTop = elem.offsetTop - (getAbsoluteHeight(elem) * 2) + elem.offsetHeight;
+  scrollTo(panelDropdown, offsetTop, 250);
+}
 
 // Event Listener for checking user pressing the Enter-key
+
+var isTabKeyDown = false;
+
+document.addEventListener('keyup', function(event) {
+  var elem = document.activeElement;
+
+  if (event.keyCode == 9) {
+    event.preventDefault();
+
+    isTabKeyDown = false;
+
+    // if (document.activeElement == urlIn) {
+    //   // console.log(document.activeElement);
+    // }
+
+    if (event.shiftKey) {
+
+      if (!isDropDownOpen()) {
+        // If it is not open, open it
+        toggleLinkEdit(selectedID);
+        toggleDropdown();  
+        changeLink(selectedID);
+        scrollToLink(selectedID);
+      } else {
+        toggleLinkEdit(selectedID);
+      }
+      
+    } else {
+
+      if (!isDropDownOpen()) {
+        // If it is not open, open it
+        toggleDropdown();  
+        changeLink(selectedID);
+        scrollToLink(selectedID);
+      } else {
+        // Dropdown already open
+        if (elem.classList.contains('link-input')) {
+          switchLinkInputFocus(elem);
+        } else {
+          changeLink(selectedID + 1);
+          scrollToLink(selectedID);
+        }
+      }
+      // Scrolll scroll to the selected Link;
+    }
+
+  }
+});
+
 document.addEventListener('keydown', function(event){
-  var id = document.activeElement.id;
-  var i = parseInt(id.substring(id.length - 1, id.length));
-  var element = document.getElementById(id);
+  // var id = document.activeElement.id;
+  // var i = parseInt(id.substring(id.length - 1, id.length));
+  var elem = document.activeElement;
+
+  // console.log(elem);
+  if (isTabKeyDown) {
+    event.preventDefault();
+    // Reserve for finding the corresponding
+    var letter = String.fromCharCode(event.keyCode);
+    if (letter == "A") {
+
+      if (!isDropDownOpen()) {
+        toggleDropdown();
+        changeLink(1);
+        scrollToLink(1);
+      }
+    }
+  }
+
+  if (event.keyCode == 9) {
+    // Tab Key down
+    event.preventDefault();
+
+    isTabKeyDown =true;
+  }
 
   // Check if it is an enter
   if (event.keyCode == 13) {
-    if (element.tagName.toLowerCase() == "input") {
-      event.preventDefault();
-      toggleLinkEdit(i);
+    event.preventDefault();
+    // Enter Key Down
+    // console.log(elem);
+    if (elem.classList.contains("link-input")) {
+      
+      toggleLinkEdit(getElemIndex(elem.parentNode));
     } else
-    if (element.tagName.toLowerCase() == "textarea"){
-      if (event.shiftKey) {
 
-        event.preventDefault();
+    if (elem.tagName.toLowerCase() == "textarea"){
+      if (event.shiftKey) {
+        // event.preventDefault();
         goToURL();
       }
     }
   }
   
-
-  
 });
+
+urlIn.addEventListener('focus', function(){
+  // console.log("URL IN FOCUS");
+  setTimeout(function() {
+    urlIn.select()
+  }, 3);
+  // urlIn.setSelectionRange(0, 1);
+  // var selObj = window.getSelection(); 
+  // console.log(selObj);
+  
+  // var selRange = selObj.getRangeAt(0);
+  // console.log(selRange);
+})
 
 function toggleLinkEdit(i) {
   var link = panelDropdown.children[i];
@@ -693,12 +791,17 @@ function toggleLinkEdit(i) {
   var linkDeleteIcon = link.children[2];
   var linkURL = link.children[3];
 
+  // Check if is Saving the URL
   if (linkEditIcon.classList.contains('icon-check')) {
+
+    document.getSelection().removeAllRanges();
     // Modifiy the URL
     urlsName[i] = linkName.value;
     urls[i] = linkURL.value;
     // Set the URLs
     setURLs();
+
+    urlIn.focus();
   }
 
   linkEditIcon.classList.toggle("icon-mode_edit");
@@ -716,19 +819,13 @@ function toggleLinkEdit(i) {
   link.classList.toggle('edit');
 }
 
-
-// V1.4 Support for appending info boxes for quickly copying onclick
-
-// const dataInfoIDAttribute = "data-info-id";
-
-'use strict';
-
 function displayInfo() {
 
   if (infoText.length <= 0) return;
 
   var infoContainer = document.getElementById('line-info-container');
 
+  // Adding them to the Info Container
   infoText.forEach( function(element, index) {
     var newInfoText = document.createElement('button');
     newInfoText.classList.add('btn-info');
@@ -838,5 +935,4 @@ const copyToClipboard = str => {
     document.getSelection().addRange(selected);   // Restore the original selection
   }
 };
-
 
