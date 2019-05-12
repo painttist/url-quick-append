@@ -102,24 +102,34 @@ body {
 
 /* width */
 ::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar:hover {
   width: 10px;
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #f1f1f1; 
+  background: #f6f6f6; 
 }
  
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #888; 
+  background: #a6a6a6;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  /*border-radius: 10px;*/
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #555; 
+  background: #868686; 
 }
 
+::-webkit-scrollbar-thumb:active{
+  background: #555; 
+}
 
 
 .btn {
@@ -395,7 +405,10 @@ input:checked + .slider:before {
   margin-top: 0px;
 }
 
-
+.link:focus > *,
+.link:focus {
+  background: #f6f6f6;
+}
 
 .link {
   

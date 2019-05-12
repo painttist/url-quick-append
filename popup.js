@@ -155,44 +155,9 @@ function goToURL() {
 
 // DROP DOWN
 
-
 btnDropdownLinks.addEventListener('click', function() { 
   if (event.target.classList.contains('icon-add')) {
-    
-    // Add a new link
-
-    panelDropdown.removeChild(panelDropdown.lastChild);
-
-    urlsName.push("Name");
-    urls.push("URL");
-
-    var newLink = appendToPanelDropdown(urls.length - 1);
-
-    
-    newLink.children[1].classList.toggle("icon-mode_edit");
-    newLink.children[1].classList.toggle("icon-check");
-
-    newLink.children[0].readOnly = !newLink.children[0].readOnly;
-    // link.children[0].focus();
-
-    if (!newLink.children[0].readOnly) {
-      newLink.children[0].select();
-    } else {
-      clearSelection();
-    }
-    newLink.children[3].classList.toggle('edit');
-    newLink.classList.toggle('edit');
-
-    appendAddLink();
-    // setTimeout(scrollToBottom, 1);
-
-    // panelDropdown.scrollTo({
-    //   top: panelDropdown.scrollHeight + 120,
-    //   left: 0,
-    //   behavior: 'smooth'
-    // });
-
-    scrollTo(panelDropdown, panelDropdown.scrollHeight - panelDropdown.offsetHeight, 250);
+    appendNewLink();
   } else {
     toggleDropdown();   
   }
@@ -214,48 +179,44 @@ function appendURLList() {
   
 }
 
+function appendNewLink() {
+
+  // Add a New Link Blank
+
+  // Remove Line Add Link
+  panelDropdown.removeChild(panelDropdown.lastChild);
+
+  urlsName.push("Name");
+  urls.push("URL");
+
+  var newLink = appendToPanelDropdown(urls.length - 1);
+  
+  newLink.children[1].classList.toggle("icon-mode_edit");
+  newLink.children[1].classList.toggle("icon-check");
+
+  newLink.children[0].readOnly = !newLink.children[0].readOnly;
+  // link.children[0].focus();
+
+  if (!newLink.children[0].readOnly) {
+    newLink.children[0].select();
+  } else {
+    clearSelection();
+  }
+  newLink.children[3].classList.toggle('edit');
+  newLink.classList.toggle('edit');
+
+  // Add Line Add Link
+  appendAddLink();
+  scrollTo(panelDropdown, panelDropdown.scrollHeight - panelDropdown.offsetHeight, 250);
+}
+
 function appendAddLink() {
 
   var link = document.createElement("div");
   link.classList = "line link";
 
   link.addEventListener('click', function(){
-
-    link.parentNode.removeChild(link);
-
-    // Add a New One
-    urls.push("URL");
-    urlsName.push("Name");
-    var newLink = appendToPanelDropdown(urls.length - 1);
-
-    
-    newLink.children[1].classList.toggle("icon-mode_edit");
-    newLink.children[1].classList.toggle("icon-check");
-
-    newLink.children[0].readOnly = !newLink.children[0].readOnly;
-    // link.children[0].focus();
-
-    if (!newLink.children[0].readOnly) {
-      newLink.children[0].select();
-    } else {
-      clearSelection();
-    }
-    newLink.children[3].classList.toggle('edit');
-    newLink.classList.toggle('edit');
-
-    appendAddLink();
-    // setTimeout(scrollToBottom, 1);
-
-    // panelDropdown.scrollTo({
-    //   top: panelDropdown.scrollHeight + 120,
-    //   left: 0,
-    //   behavior: 'smooth'
-    // });
-
-    scrollTo(panelDropdown, panelDropdown.scrollHeight - panelDropdown.offsetHeight, 250);
-
-    // panelDropdown.scrollTop = panelDropdown.scrollHeight - panelDropdown.offsetHeight;
-
+    appendNewLink();
   });
 
   var linkPlusIcon = document.createElement('span');
@@ -305,36 +266,64 @@ function appendToPanelDropdown(i) {
     link.addEventListener('mouseover', function(){
       changeLink(i);
     });
-    link.addEventListener('click', function() {
-      if ((event.target.classList.contains('link-btn-delete'))){
+    link.addEventListener('click', function(ev) {
+
+      var target = ev.target;
+
+      if ((target.classList.contains('link-btn-delete'))){
         overlayDel.classList.toggle('on');
         selectedID = i;
-      } else if ((event.target.classList.contains('link-btn-edit'))) {
+      } else if ((target.classList.contains('link-btn-edit'))) {
         toggleLinkEdit(i);
-      }
-      else if ( link.classList.contains("edit") && 
-              ((event.target.classList.contains("link-name")) || 
-              (event.target.classList.contains("link-url")))) {
-        selectedID = i;
-      } else {
+      } else if (target.classList.contains("link-name") || 
+                (target.classList.contains("link-url"))) 
+      {
+        changeLink(i);
+        if (!target.parentNode.classList.contains('edit')) {
+          toggleDropdown();
+        }
+      } else if (target.classList.contains('link')){
+        // Clicked on the Link itself
 
-        // Modifiy the URL
-        urlsName[i] = link.children[0].value;
-        urls[i] = link.children[3].value;
-        // Set the URLs
+        // Save the URL
+        urlsName[i] = ev.target.children[0].value;
+        urls[i] = ev.target.children[3].value;
         setURLs();
 
-        if (event.target.classList.contains('link'))
-        if (event.target.children[1].classList.contains('icon-check')) {
-          toggleLinkEdit(i);
-        }
-
-        // Clicked on the line but outside of everything
-        selectedID = i;
+        // Change the link displaying
         changeLink(i);
-        toggleDropdown();
-
+        
+        if (!target.classList.contains('edit')) {
+          toggleDropdown();
+        }
       }
+
+      // else if ( link.classList.contains("edit") && 
+      //         ((event.target.classList.contains("link-name")) || 
+      //         (event.target.classList.contains("link-url")))) {
+      //   selectedID = i;
+      // } else {
+
+      //   // Modifiy the URL
+      //   urlsName[i] = link.children[0].value;
+      //   urls[i] = link.children[3].value;
+      //   // Set the URLs
+      //   setURLs();
+
+      //   if (event.target.classList.contains('link'))
+      //   if (event.target.children[1].classList.contains('icon-check')) {
+      //     toggleLinkEdit(i);
+      //   }
+
+      //   // Clicked on the line but outside of everything
+      //   selectedID = i;
+      //   changeLink(i);
+        
+      //   if (!link.classList.contains('edit')) {
+      //     console.log(link.classList);
+      //     toggleDropdown();
+      //   }
+      // }
     });
 
     var linkName = document.createElement("input");
@@ -383,9 +372,10 @@ function appendToPanelDropdown(i) {
 function changeLink(id) {
   if (id >= urls.length) {
     selectedID = urls.length-1;
-    id = selectedID;
+  } else {
+    selectedID = id;
   }
-  document.getElementById('link-selected').innerHTML = urlsName[id];
+  document.getElementById('link-selected').innerHTML = urlsName[selectedID];
   recordID();
 }
 
@@ -615,8 +605,6 @@ var autoExpand = function (field) {
   //              + field.scrollHeight
   //              // + parseInt(computed.getPropertyValue('padding-bottom'), 10)
   //              + parseInt(computed.getPropertyValue('border-bottom-width'), 10);
-
-
 
   var clientHeight = parseInt(field.clientHeight, 10);
   var baseLineHeight = parseInt(computed.getPropertyValue('line-height'), 10);
