@@ -3,8 +3,8 @@
   <head>
     <!-- <link rel= "stylesheet" type= "text/css" href= "normalize.css"/> -->
     <link rel= "stylesheet" type= "text/css" href= "normalize.min.css"/>
-    <link rel= "stylesheet" type= "text/css" href= "styles.css"/>
-    <!-- <link rel= "stylesheet" type= "text/css" href= "styles.min.css"/> -->
+    <!-- <link rel= "stylesheet" type= "text/css" href= "styles.css"/> -->
+    <link rel= "stylesheet" type= "text/css" href= "styles.min.css"/>
     <meta charset="UTF-8">
   </head>
   <body>
@@ -29,23 +29,25 @@
       </div>
       <div id="line-url-input" class="line">
         <textarea rows="1" cols="10" id="url-input" wrap="soft" tabindex="1" placeholder="URL(s) To Append 链接后缀"></textarea>
-        <button id="btn-clean" class="hidden">
-          <span class="icon-mode_edit"></span>
-        </button>
-        <button id="btn-undo" class="hidden">
-          <span class="icon-replay"></span>
-        </button>
-        <button id="btn-go">
-          <span class="icon-open_in_new"></span>
-        </button>
+        <div class="btn-group-vertical">
+          <button id="btn-clean" class="hidden">
+            <span class="icon-mode_edit"></span>
+          </button>
+          <button id="btn-undo" class="hidden">
+            <span class="icon-replay"></span>
+          </button>
+          <button id="btn-go">
+            <span class="icon-open_in_new"></span>
+          </button>
+        </div>
       </div>
       <div id="line-info-container" class="line">
       </div>
     </div>
 
 
-    <!-- <script src="popup.min.js"></script> -->
-    <script src="popup.js"></script>
+    <script src="popup.min.js"></script>
+    <!-- <script src="popup.js"></script> -->
 
   </body>
 </html>

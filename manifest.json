@@ -1,6 +1,6 @@
 {
   "name": "URL Quick Append",
-  "version": "1.4.3",
+  "version": "1.4.5",
   "description": "Quickly Append ID to URLs.",
   "permissions": [
     "storage"

@@ -25,7 +25,6 @@ var theurl;
 var urls = [];
 var urlsName = [];
 
-
 btnGo.disabled = true;
 
 var oldOpts = getCachedOpts();
@@ -100,9 +99,6 @@ function getOptions() {
   });
 }
 
-getOptions();
-getURLs();
-
 function setDefaultURLs() {
   chrome.storage.sync.set({urlsInfo : {
       'urlsName': [
@@ -134,7 +130,6 @@ function setDefaultURLs() {
 }
 
 // UTILITY
-
 function getElemIndex(elem) {
   return Array.from(elem.parentNode.children).indexOf(elem);
 }
@@ -151,8 +146,6 @@ function getAbsoluteHeight(el) {
 }
 
 // GO
-
-btnGo.onclick = goToURL;
 
 function goToURL() {
 
@@ -198,7 +191,14 @@ function appendURLList() {
   });
 
   appendAddLink();
+
+  changeLink(selectedID);
 }
+
+// panelDropdown.addEventListener("scroll", function (ev) {
+//   console.log("Scroll Height: " + (panelDropdown.scrollHeight - panelDropdown.offsetHeight));
+//   console.log('Scroll Top: ' + panelDropdown.scrollTop);
+// });
 
 function appendNewLink() {
 
@@ -216,15 +216,14 @@ function appendNewLink() {
   newLink.children[1].classList.toggle("icon-check");
 
   newLink.children[0].readOnly = !newLink.children[0].readOnly;
-  // link.children[0].focus();
+  
+  newLink.children[0].focus();
+  newLink.children[0].select();
 
-  if (!newLink.children[0].readOnly) {
-    newLink.children[0].select();
-  } else {
-    clearSelection();
-  }
   newLink.children[3].classList.toggle('edit');
   newLink.classList.toggle('edit');
+
+  changeLink(getElemIndex(newLink));
 
   // Add Line Add Link
   appendAddLink();
@@ -237,9 +236,8 @@ function appendAddLink() {
   link.classList = "line link";
   link.setAttribute('tabindex', '-1');
 
-  link.addEventListener('click', function(){
-    appendNewLink();
-  });
+  // link.addEventListener('mouseover', linkOnMouseOver);
+  link.addEventListener('click', appendNewLink);
 
   var linkPlusIcon = document.createElement('span');
   linkPlusIcon.classList = "link-btn-add icon-add";
@@ -248,9 +246,6 @@ function appendAddLink() {
   link.appendChild(linkPlusIcon);
 
   panelDropdown.appendChild(link);
-
-  changeLink(selectedID);  
-
 }
 
 overlayDel.addEventListener('click', function(){
@@ -258,14 +253,7 @@ overlayDel.addEventListener('click', function(){
     if (event.target.classList.contains('icon-check')) {
       
       // Delete link pending
-      panelDropdown.children[selectedID].classList.add('removed');
-      urls.splice(selectedID, 1);
-      urlsName.splice(selectedID, 1);
-      setURLs();
-
-      panelDropdown.children[selectedID].addEventListener('transitionend', function(){
-        this.remove();
-      });
+      linkDelete(selectedID);
       
       overlayDel.classList.toggle('on');
 
@@ -278,10 +266,33 @@ overlayDel.addEventListener('click', function(){
 
 });
 
-function linkOnClick(ev) {
+function linkDelete(id) {
 
+  panelDropdown.children[id].classList.add('removed');
+  urls.splice(id, 1);
+  urlsName.splice(id, 1);
+  setURLs();
+
+  scrollToLink(id > 0 ? id - 1 : 0);
+
+  // console.log("Scroll Height: " + (panelDropdown.scrollHeight - panelDropdown.offsetHeight));
+  // console.log('Scroll Top: ' + panelDropdown.scrollTop);
+
+
+  // scrollTo(panelDropdown, panelDropdown.scrollHeight - panelDropdown.offsetHeight, 250);
+
+  panelDropdown.children[id].addEventListener('transitionend', function(){
+    this.remove();
+  });
+
+}
+
+function linkOnClick(ev) {
+  
   var target = ev.target;
   var i = getElemIndex(ev.currentTarget);
+
+  // console.log('linkOnClick: ' + i);
 
   if ((target.classList.contains('link-btn-delete'))){
     // Clicked on the Delete Button
@@ -293,12 +304,23 @@ function linkOnClick(ev) {
   } else if (target.classList.contains("link-name") || 
             (target.classList.contains("link-url"))) 
   {
+    // Click on the Name or URL Input box
     changeLink(i);
+
     if (!target.parentNode.classList.contains('edit')) {
+      // If is not in editing mode
+      // Deselect that link
+      tabDeselectLink(i);
+
+      // Focus on URL Input
+      urlIn.focus();
+      urlIn.select();
+
+      // And toggle the dropdown
       toggleDropdown();
     }
   } else if (target.classList.contains('link')){
-    // Clicked on the Link itself
+    // Clicked on the any other parts of the link
 
     // Save the URL
     urlsName[i] = ev.target.children[0].value;
@@ -309,10 +331,25 @@ function linkOnClick(ev) {
     changeLink(i);
     
     if (!target.classList.contains('edit')) {
+      // If is not in editing mode
+      // Deselect that link
+      tabDeselectLink(i);
+
+      // Focus on URL Input
+      urlIn.focus();
+      urlIn.select();
+
+      // And toggle the dropdown
       toggleDropdown();
     }
   }
+}
 
+
+
+function linkOnMouseOver(ev) {
+  var id = getElemIndex(ev.currentTarget);
+  changeLink(id);
 }
 
 function appendToPanelDropdown(i) {
@@ -321,9 +358,7 @@ function appendToPanelDropdown(i) {
   link.classList = "line link";
   link.setAttribute('tabindex', '-1');
 
-  link.addEventListener('mouseover', function(){
-    changeLink(i);
-  });
+  link.addEventListener('mouseover', linkOnMouseOver);
   link.addEventListener('click', linkOnClick);
 
   var linkName = document.createElement("input");
@@ -360,20 +395,23 @@ function displayLink(id) {
 
 function changeLink(id) {
 
+  // console.log('changeLink: ' + id);
+
+  selectedID = loop(selectedID, 0, urls.length - 1);
+
   tabDeselectLink(selectedID);
 
-  if (id < 0) {
-    selectedID = urls.length - 1;
-  } else if (id >= urls.length) {
-    selectedID = 0;
-  } else {
-    selectedID = id;
-  }
-
+  selectedID = loop(id, 0, urls.length - 1);
+  
   tabSelectLink(selectedID);
 
   displayLink(selectedID);
   recordID();
+}
+
+// Include Min, Exclude Max
+function loop(val, min, max){
+    return val < min? max : (val > max? min : val);
 }
 
 function toggleDropdown() {
@@ -391,8 +429,7 @@ function toggleDropdown() {
   setURLs();
 }
 
-function clearSelection()
-{
+function clearSelection() {
   if (window.getSelection) {window.getSelection().removeAllRanges();}
   else if (document.selection) {document.selection.empty();}
 }
@@ -405,17 +442,16 @@ function isDropDownOpen() {
 
 // URL INPUT
 
-// autoExpand(document.getElementById('url-input'));
-
 document.addEventListener('input', function (event) {
 
   if (event.target.tagName.toLowerCase() !== 'textarea') return;
   
   recordUrlInText();
-  autoExpand(event.target);
-
-  checkInputToClean();
+  
+  updateCleanButton();
   btnCleanUndo.classList.add('hidden');
+
+  autoExpand(event.target);
 
 }, false);
 
@@ -430,8 +466,10 @@ function undoClearInput() {
   btnCleanUndo.classList.add('hidden');
   urlIn.value = beforeUndoUrlsInText;
 
+  recordUrlInText();
+
   urlIn.focus();
-  checkInputToClean();
+  updateCleanButton();
   autoExpand(urlIn);
 }
 
@@ -439,7 +477,8 @@ const regKey = RegExp('['+keywords.join('')+']{2,3} *:+ *\\S*', 'gm');
 const regKeySingle = RegExp('['+keywords.join('')+']{2,3} *:+ *\\S*');
 // const regKeyClean = RegExp('['+keywords.join('')+']{2,3}:+ *');
 const regColonClean = /[\s\S]*:+ */g;
-const regColon = /:+[^:\s]+/g;
+const regColon = /\S*:+ *[^:\s]+/g;
+const regEmptyDes = /[\S]*:+ */g;
 
 function cleanInput() {
 
@@ -457,15 +496,39 @@ function cleanInput() {
   var keys = raw.match(regKey);
   raw = raw.replace(regKey, " ");
 
+  console.log('regKey');
+  console.log(raw);
+
   // Delete Any Ending"/"
   raw = raw.replace(/\/$/gm, "");
+
+  console.log('Ending /');
+  console.log(raw);
+  
+
   // Delete Any "/" followed by Spaces
   raw = raw.replace(/\/\s/g, " ");
+
+  console.log('Ending / + space');
+  console.log(raw);
+
   // Delete all Front URLs
   raw = raw.replace(/(\S*\/)+/g, '\n');
 
+  console.log('Front URL');
+  console.log(raw);
+
   var colons = raw.match(regColon);
   raw = raw.replace(regColon, " ");
+
+  console.log('regColon');
+  console.log(raw);
+
+  var colonDes = raw.match(regEmptyDes);
+  raw = raw.replace(regEmptyDes, "");
+
+  console.log('regEmptyDes');
+  console.log(raw);
 
   var infos = [];
 
@@ -492,40 +555,6 @@ function cleanInput() {
     cleanedString = "";
   }
 
-  // 密码 提取码 [\u5bc6\u7801\u63d0\u53d6\u78bc]{2,3}
-  
-  // while ((cleanedString == '') && (splitSlash.length >= 1)) {
-  // var cleanedString = splitSlash.pop();
-  // // }
-
-  // keywords.forEach(function(el, i){
-  //   var wordSplit = cleanedString.split(el);
-
-  //   if (wordSplit.length > 1) {
-  //     cleanedString = wordSplit.join(' :');
-  //   }
-  // });
-  
-  // var splitColons = cleanedString.replace('：',':').split(":");
-
-  // cleanedString = "";
-
-  // if (splitColons.length <= 1) {
-  //   cleanedString += splitColons.join('');
-  // } else {
-  //   var front = splitColons.shift();
-  //   var frontSplit = front.split(" ");
-  //   var tag = frontSplit.pop();
-  //   cleanedString += frontSplit.join('');
-
-  //   splitColons.forEach(function (el, i){
-  //     el.replace(' ', '');
-  //     if (el.length > 0) {
-  //       infoText.push(el);
-  //     }
-  //   })
-  // }
-
   refreshInfo();
   recordInfoText();
   
@@ -534,38 +563,48 @@ function cleanInput() {
   btnCleanUndo.classList.remove('hidden');
 
   recordUrlInText();
-  checkInputToClean();
+  updateCleanButton();
   urlIn.focus();
   autoExpand(urlIn);
 }
 
-function checkInputToClean() {
-
-  var raw = urlIn.value;
-  var toClean = false;
-
-  var matchSlash = raw.match('/');
-  if (matchSlash) {
-    toClean = true;
-  }
-
-  var matchColons = raw.replace('：',':').match(/:\S/);
-  if (matchColons) {
-    toClean = true;
-  }
-
-  var checkKeys = raw.match(regKeySingle);
-  if (checkKeys) {
-    toClean = true;
-  }
-
-  if (toClean) {
+function updateCleanButton() {
+  if (checkInputToClean()) {
     urlIn.classList.add('toClean');
     btnClean.classList.remove('hidden');
   } else {
     urlIn.classList.remove('toClean');
     btnClean.classList.add('hidden');
   }
+}
+
+function checkInputToClean() {
+
+  var raw = urlIn.value;
+  // var toClean = false;
+
+  var matchSlash = raw.match('/');
+  if (matchSlash) {
+    // console.log("True");
+    return true;
+  }
+
+  var matchColons = raw.replace('：',':').match(regColon);
+  if (matchColons) {
+    console.log("True");
+    return true;
+  }
+
+  var checkKeys = raw.match(regKeySingle);
+  if (checkKeys) {
+    console.log("True");
+    return true;
+  }
+
+  console.log("False");
+  return false;
+
+
 }
 
 var autoExpand = function (field) {
@@ -605,12 +644,6 @@ var autoExpand = function (field) {
 
 };
 
-urlIn.value = urlInText;
-urlIn.focus();
-urlIn.select();
-autoExpand(urlIn);
-checkInputToClean();
-
 function scrollTo(element, to, duration) {
 
   var start = element.scrollTop,
@@ -642,15 +675,17 @@ Math.easeInOutQuad = function (t, b, c, d) {
 };
 
 function tabSelectLink(id) {
+  // if (id < panelDropdown.children.length)
   panelDropdown.children[id].setAttribute('data-selected', 'true');
 }
 
 function tabDeselectLink(id) {
+  // if (id < panelDropdown.children.length)
   panelDropdown.children[id].setAttribute('data-selected', 'false');
 }
 
 function switchLinkInputFocus(elem) {
-  console.log("Switch Focus");
+  // console.log("Switch Focus");
   var link = elem.parentNode;
 
   var linkName = link.children[0];
@@ -676,48 +711,50 @@ function scrollToLink(id) {
 // Event Listener for checking user pressing the Enter-key
 
 var isTabKeyDown = false;
+var isTabQuickSelected = false;
 
 document.addEventListener('keyup', function(event) {
   var elem = document.activeElement;
 
   if (event.keyCode == 9) {
+    // Tab Key Up
     event.preventDefault();
 
     isTabKeyDown = false;
 
-    // if (document.activeElement == urlIn) {
-    //   // console.log(document.activeElement);
-    // }
+    if (!isTabQuickSelected) {
+      if (event.shiftKey) {
 
-    if (event.shiftKey) {
-
-      if (!isDropDownOpen()) {
-        // If it is not open, open it
-        toggleLinkEdit(selectedID);
-        toggleDropdown();  
-        changeLink(selectedID);
-        scrollToLink(selectedID);
-      } else {
-        toggleLinkEdit(selectedID);
-      }
-      
-    } else {
-
-      if (!isDropDownOpen()) {
-        // If it is not open, open it
-        toggleDropdown();  
-        changeLink(selectedID);
-        scrollToLink(selectedID);
-      } else {
-        // Dropdown already open
-        if (elem.classList.contains('link-input')) {
-          switchLinkInputFocus(elem);
-        } else {
-          changeLink(selectedID + 1);
+        if (!isDropDownOpen()) {
+          // If it is not open, open it
+          toggleLinkEdit(selectedID);
+          toggleDropdown();  
+          changeLink(selectedID);
           scrollToLink(selectedID);
+        } else {
+          toggleLinkEdit(selectedID);
         }
+        
+      } else {
+
+        if (!isDropDownOpen()) {
+          // If it is not open, open it
+          toggleDropdown();  
+          changeLink(selectedID);
+          scrollToLink(selectedID);
+        } else {
+          // Dropdown already open
+          if (elem.classList.contains('link-input')) {
+            switchLinkInputFocus(elem);
+          } else {
+            changeLink(selectedID + 1);
+            scrollToLink(selectedID);
+          }
+        }
+        // Scrolll scroll to the selected Link;
       }
-      // Scrolll scroll to the selected Link;
+    } else {
+      isTabQuickSelected = false;
     }
 
   }
@@ -728,19 +765,47 @@ document.addEventListener('keydown', function(event){
   // var i = parseInt(id.substring(id.length - 1, id.length));
   var elem = document.activeElement;
 
-  // console.log(elem);
   if (isTabKeyDown) {
+    // When tab is down
     event.preventDefault();
-    // Reserve for finding the corresponding
-    var letter = String.fromCharCode(event.keyCode);
-    if (letter == "A") {
 
-      if (!isDropDownOpen()) {
-        toggleDropdown();
-        changeLink(1);
-        scrollToLink(1);
+    var letter = String.fromCharCode(event.keyCode);
+
+    if (letter.match(/\S/)) {
+      // console.log("Pressed: " + letter);
+      isTabQuickSelected = true;
+
+      var currentCap = urlsName[selectedID][0]
+
+      var startID = 0;
+      if (letter == currentCap) {
+        // from selectedID, find next available one with this Cap
+        startID = loop(selectedID+1, 0, urlsName.length - 1);
+      }
+
+      // console.log(urlsName.length);
+
+      for (var i = startID; i < startID+urlsName.length; i++) {
+        var id = i % urlsName.length;
+        if (urlsName[id][0].toUpperCase() == letter) {
+          // Found a match
+          // console.log("Found!" + urlsName[i] + ", at " + i);
+
+          changeLink(id);
+          scrollToLink(selectedID);
+          return;
+        }
       }
     }
+
+    // if (letter == "A") {
+
+    //   if (!isDropDownOpen()) {
+    //     toggleDropdown();
+    //     changeLink(1);
+    //     scrollToLink(1);
+    //   }
+    // }
   }
 
   if (event.keyCode == 9) {
@@ -752,36 +817,26 @@ document.addEventListener('keydown', function(event){
 
   // Check if it is an enter
   if (event.keyCode == 13) {
-    event.preventDefault();
     // Enter Key Down
     // console.log(elem);
     if (elem.classList.contains("link-input")) {
-      
+      event.preventDefault();
       toggleLinkEdit(getElemIndex(elem.parentNode));
     } else
-
     if (elem.tagName.toLowerCase() == "textarea"){
       if (event.shiftKey) {
-        // event.preventDefault();
-        goToURL();
+        event.preventDefault();
+
+        if (checkInputToClean()) {
+          cleanInput();
+        } else {
+          goToURL();
+        }
       }
     }
   }
   
 });
-
-urlIn.addEventListener('focus', function(){
-  // console.log("URL IN FOCUS");
-  setTimeout(function() {
-    urlIn.select()
-  }, 3);
-  // urlIn.setSelectionRange(0, 1);
-  // var selObj = window.getSelection(); 
-  // console.log(selObj);
-  
-  // var selRange = selObj.getRangeAt(0);
-  // console.log(selRange);
-})
 
 function toggleLinkEdit(i) {
   var link = panelDropdown.children[i];
@@ -910,7 +965,7 @@ function removeInfoText(content) {
   recordInfoText();
 }
 
-displayInfo();
+
 
 String.prototype.isEmpty = function() {
     return (this.length === 0 || !this.trim());
@@ -935,4 +990,33 @@ const copyToClipboard = str => {
     document.getSelection().addRange(selected);   // Restore the original selection
   }
 };
+
+getOptions();
+getURLs();
+
+urlIn.value = urlInText;
+urlIn.focus();
+urlIn.select();
+autoExpand(urlIn);
+updateCleanButton();
+
+
+autoExpand(urlIn);
+
+btnGo.onclick = goToURL;
+
+
+urlIn.addEventListener('focus', function(){
+  // console.log("URL IN FOCUS");
+  setTimeout(function() {
+    urlIn.select()
+  }, 3);
+  // urlIn.setSelectionRange(0, 1);
+  // var selObj = window.getSelection(); 
+  // console.log(selObj);
+  
+  // var selRange = selObj.getRangeAt(0);
+  // console.log(selRange);
+});
+displayInfo();
 

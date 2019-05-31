@@ -481,48 +481,41 @@ input:checked + .slider:before {
   resize: none;
 }
 
-#btn-clean, #btn-undo {
+.btn-group-vertical {
+  display: flex;
+  flex-direction: column;
+  /*flex-wrap: wrap;*/
+
+  width: auto;
+}
+
+.btn-group-vertical > button {
+  flex: 1 0 auto;
+  width: 40px;
+  /*height: 40px;*/
   /*position: absolute;
   top: 0;
   right: 45px;*/
   
-  padding: 13px auto;
+  /*padding: 13px auto;*/
   border: 0px;
 
-  cursor: pointer;
-
-  transition: all 0.25s ease;
-  background: none;
-
-  /*border-bottom-left-radius: 10px;*/
-  opacity: 0.5; 
-}
-
-#btn-clean:hover, #btn-undo:hover {
-  opacity: 1;
-}
-
-#btn-clean.hidden, #btn-undo.hidden {
-  display: none;
-}
-
-#btn-go {
-  
-  /*margin-top: -1px;*/
-  width: 41px;
-  /*height: 39px;*/
-  /*height: 100%;*/
-  padding: 10px;
-  border: 0px;
   cursor: pointer;
 
   transition: all 0.25s ease;
   background: #ffffff;
 
+  /*border-bottom-left-radius: 10px;*/
+  /*opacity: 0.5; */
 }
 
-#btn-go:hover {
+.btn-group-vertical > button:hover {
+  /*opacity: 1;*/
   background: #f6f6f6;
+}
+
+#btn-clean.hidden, #btn-undo.hidden {
+  display: none;
 }
 
 .link.edit {
