@@ -85,17 +85,12 @@ function getURLs() {
 }
 
 function setURLs() {
-  try {
-    chrome.storage.sync.set({urlsInfo : {
+  chrome.storage.sync.set({urlsInfo : {
       urls: urls,
       urlsName: urlsName
       }
     }, function(){
-    });  
-  } catch (error) {
-    console.log(error)
-  }
-  
+    });
 }
 
 function getOptions() {
@@ -177,7 +172,7 @@ function goToURL() {
 //   console.log(document.activeElement);
 // });
 
-btnDropdownLinks.addEventListener('click', function(event) { 
+btnDropdownLinks.addEventListener('click', function() { 
   if (event.target.classList.contains('icon-add')) {
     appendNewLink();
   } else {
@@ -253,7 +248,7 @@ function appendAddLink() {
   panelDropdown.appendChild(link);
 }
 
-overlayDel.addEventListener('click', function(event){
+overlayDel.addEventListener('click', function(){
   if (event.target.classList.contains('btn-overlay')) {
     if (event.target.classList.contains('icon-check')) {
       
@@ -721,7 +716,7 @@ var isTabQuickSelected = false;
 document.addEventListener('keyup', function(event) {
   var elem = document.activeElement;
 
-  if (event.key == "Tab") {
+  if (event.keyCode == 9) {
     // Tab Key Up
     event.preventDefault();
 
@@ -774,7 +769,7 @@ document.addEventListener('keydown', function(event){
     // When tab is down
     event.preventDefault();
 
-    var letter = event.key.toUpperCase();
+    var letter = String.fromCharCode(event.keyCode);
 
     if (letter.match(/\S/)) {
       // console.log("Pressed: " + letter);
@@ -813,7 +808,7 @@ document.addEventListener('keydown', function(event){
     // }
   }
 
-  if (event.key == "Tab") {
+  if (event.keyCode == 9) {
     // Tab Key down
     event.preventDefault();
 
@@ -821,7 +816,7 @@ document.addEventListener('keydown', function(event){
   }
 
   // Check if it is an enter
-  if (event.key == "Enter") {
+  if (event.keyCode == 13) {
     // Enter Key Down
     // console.log(elem);
     if (elem.classList.contains("link-input")) {
@@ -996,14 +991,8 @@ const copyToClipboard = str => {
   }
 };
 
-try {
-  getOptions();
-  getURLs();
-} catch (error) {
-  console.log(error)
-}
-
-
+getOptions();
+getURLs();
 
 urlIn.value = urlInText;
 urlIn.focus();
