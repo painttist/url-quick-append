@@ -1,6 +1,9 @@
 
 'use strict';
 
+import './normalize.css';
+import './styles.css';
+
 var urlIn = document.getElementById('url-input');
 
 var btnClean = document.getElementById('btn-clean');
@@ -715,7 +718,7 @@ var isTabQuickSelected = false;
 document.addEventListener('keyup', function(event) {
   var elem = document.activeElement;
 
-  if (event.keyCode == 9) {
+  if (event.key == "Tab") {
     // Tab Key Up
     event.preventDefault();
 
@@ -768,7 +771,7 @@ document.addEventListener('keydown', function(event){
     // When tab is down
     event.preventDefault();
 
-    var letter = String.fromCharCode(event.keyCode);
+    var letter = event.key.toUpperCase();
 
     if (letter.match(/\S/)) {
       // console.log("Pressed: " + letter);
@@ -807,7 +810,7 @@ document.addEventListener('keydown', function(event){
     // }
   }
 
-  if (event.keyCode == 9) {
+  if (event.key == "Tab") {
     // Tab Key down
     event.preventDefault();
 
@@ -815,7 +818,7 @@ document.addEventListener('keydown', function(event){
   }
 
   // Check if it is an enter
-  if (event.keyCode == 13) {
+  if (event.key == "Enter") {
     // Enter Key Down
     // console.log(elem);
     if (elem.classList.contains("link-input")) {
@@ -970,24 +973,8 @@ String.prototype.isEmpty = function() {
     return (this.length === 0 || !this.trim());
 };
 
-const copyToClipboard = str => {
-  const el = document.createElement('textarea');  // Create a <textarea> element
-  el.value = str;                                 // Set its value to the string that you want copied
-  el.setAttribute('readonly', '');                // Make it readonly to be tamper-proof
-  el.style.position = 'absolute';                 
-  el.style.left = '-9999px';                      // Move outside the screen to make it invisible
-  document.body.appendChild(el);                  // Append the <textarea> element to the HTML document
-  const selected =            
-    document.getSelection().rangeCount > 0        // Check if there is any content selected previously
-      ? document.getSelection().getRangeAt(0)     // Store selection if found
-      : false;                                    // Mark as false to know no selection existed before
-  el.select();                                    // Select the <textarea> content
-  document.execCommand('copy');                   // Copy - only works as a result of a user action (e.g. click events)
-  document.body.removeChild(el);                  // Remove the <textarea> element
-  if (selected) {                                 // If a selection existed before copying
-    document.getSelection().removeAllRanges();    // Unselect everything on the HTML document
-    document.getSelection().addRange(selected);   // Restore the original selection
-  }
+const copyToClipboard = (str) => {
+  navigator.clipboard.writeText(str)
 };
 
 getOptions();

@@ -1,6 +1,5 @@
 {
   "name": "URL Quick Append",
-  "version": "1.5.0",
   "description": "Quickly manipulate URL appendix",
   "permissions": [
     "storage"

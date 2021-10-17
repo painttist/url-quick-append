@@ -1,8 +1,10 @@
 {
   "name": "url-quick-append",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "description": "Extension to quickly manipulate URL appendix. You can install it from [Chrome Store](https://chrome.google.com/webstore/detail/url-quick-append/bojlanjcfkfhlnjjdjadkcngddpfloha)",
+  "private": true,
   "scripts": {
+    "build": "webpack --mode=production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,6 +19,12 @@
   },
   "homepage": "https://github.com/painttist/url-quick-append#readme",
   "devDependencies": {
+    "copy-webpack-plugin": "^9.0.1",
+    "css-loader": "^6.4.0",
+    "css-minimizer-webpack-plugin": "^3.1.1",
+    "html-webpack-plugin": "^5.4.0",
+    "mini-css-extract-plugin": "^2.4.2",
+    "style-loader": "^3.3.0",
     "webpack": "^5.58.2",
     "webpack-cli": "^4.9.0"
   }

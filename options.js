@@ -1,6 +1,9 @@
 
 'use strict';
 
+import './normalize.css';
+import './styles.css';
+
 var lazyLoading = false;
 
 var checkLazy = document.getElementById('check-lazy');
