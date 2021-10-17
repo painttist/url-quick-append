@@ -45,7 +45,8 @@ https://pan.baidu.com/s/ID-123456
 
 ## Version Notes
 
-- Version 1.4 Added URL Quick Clean, Added Quick Info Boxes
-- Version 1.3.1 Added More Default Search Queries including Youtube and Google
+- Version 1.5 Fixed reset to defaults on Chrome update bug. Supports Chrome Extension Manifest v3.
+- Version 1.4 Added URL Quick Clean, Added Quick Info Boxes.
+- Version 1.3.1 Added More Default Search Queries including Youtube and Google.
 - Version 1.3 Removed "tabs" permission because it was not needed.
-- Version 1.2 Fixed Layout Issues for Windows
+- Version 1.2 Fixed Layout Issues for Windows.
