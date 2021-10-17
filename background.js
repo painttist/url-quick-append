@@ -2,18 +2,19 @@
 
 function setDefault() {
   chrome.storage.sync.set({
-    options : {'lazyLoading': true}
-  },  function(){
+    options: { 'lazyLoading': true }
+  }, function () {
     console.log("Set Default Option")
   });
 
-  chrome.storage.sync.set({urlsInfo : {
+  chrome.storage.sync.set({
+    urlsInfo: {
       'urlsName': [
         'Google Search',
         'Youtube Search',
         'Bilibili Search',
         'Bilibili ID',
-        'Bilibili Up', 
+        'Bilibili Up',
         'Baidu Drive',
         'Pixiv ID',
         'Pixiv Artists',
@@ -23,25 +24,28 @@ function setDefault() {
         'https://www.google.com/search?q=',
         'https://www.youtube.com/results?search_query=',
         'https://search.bilibili.com/all?keyword=',
-        'https://www.bilibili.com/video/av', 
+        'https://www.bilibili.com/video/av',
         'https://space.bilibili.com/',
         'https://pan.baidu.com/s/',
         'https://www.pixiv.net/member_illust.php?mode=medium&illust_id=',
         'https://www.pixiv.net/member.php?id=',
         'https://www.youtube.com/watch?v=',
         'https://yande.re/post/show/'
-        ]
-      }
-    }, function(){
-      console.log("Set Default URLs");
-    });
+      ]
+    }
+  }, function () {
+    console.log("Set Default URLs");
+  });
 }
 
-chrome.runtime.onInstalled.addListener(setDefault);
-
-
-
-
-
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === chrome.runtime.OnInstalledReason.INSTALL) {
+    console.log("First install. Setting defaults")
+    setDefault()
+    // chrome.runtime.setUninstallURL('https://example.com/extension-survey');
+  } else {
+    console.log("Hello from background script")
+  }
+});
 
 

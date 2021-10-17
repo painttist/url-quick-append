@@ -139,8 +139,7 @@ function getAbsoluteHeight(el) {
   el = (typeof el === 'string') ? document.querySelector(el) : el; 
 
   var styles = window.getComputedStyle(el);
-  var margin = parseFloat(styles['marginTop']) +
-               parseFloat(styles['marginBottom']);
+  var margin = parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom']);
 
   return Math.ceil(el.offsetHeight + margin);
 }
@@ -157,7 +156,7 @@ function goToURL() {
     theurl = urls[selectedID] + item;
     if (lazyLoading) {
       chrome.tabs.create({
-          url: chrome.extension.getURL('lazyloading.html#') + theurl,
+          url: chrome.runtime.getURL('lazyloading.html#') + theurl,
           selected: false
         });
     } else {
